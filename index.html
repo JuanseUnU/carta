@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Carta de Amor</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&family=Lora:ital@0;1&display=swap');
+
+        body {
+            font-family: 'Lora', serif;
+            line-height: 1.8;
+            height: 100vh;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #faf7f5;
+            perspective: 1000px;
+            overflow: hidden; /* Evita el desbordamiento de los corazones */
+        }
+
+        .music-control {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px 20px;
+            border-radius: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: 'Lora', serif;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .music-control.visible {
+            opacity: 1;
+        }
+
+        .music-control button {
+            background: #e74c3c;
+            border: none;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background 0.3s ease;
+        }
+
+        .music-control button:hover {
+            background: #c0392b;
+        }
+
+        .envelope {
+            width: 300px;
+            height: 200px;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
+            position: relative;
+            cursor: pointer;
+            transform-style: preserve-3d;
+            transition: transform 0.5s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            z-index: 2; /* Asegura que el sobre esté sobre los corazones */
+        }
+
+        .envelope.open {
+            transform: rotateX(180deg);
+            pointer-events: none;
+        }
+
+        .envelope:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 0;
+            border-left: 150px solid rgba(255, 154, 158, 0.8);
+            border-right: 150px solid rgba(255, 154, 158, 0.8);
+            border-top: 100px solid transparent;
+            border-bottom: 100px solid rgba(255, 154, 158, 0.8);
+        }
+
+        .envelope:after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 0;
+            border-left: 150px solid transparent;
+            border-right: 150px solid transparent;
+            border-top: 100px solid rgba(250, 208, 196, 0.9);
+            transform-origin: top;
+            transition: transform 0.5s ease;
+        }
+
+        .envelope.open:after {
+            transform: rotateX(180deg);
+        }
+
+        .envelope-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: #8b4513;
+            font-family: 'Dancing Script', cursive;
+            z-index: 2;
+            width: 100%;
+        }
+
+        .envelope-text .from-to {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        .envelope-text .message {
+            font-size: 0.9em;
+            margin-top: 10px;
+        }
+
+        .heart {
+            color: #e74c3c;
+            font-size: 1.5em;
+            margin: 5px 0;
+        }
+
+        .letter {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 80vw;
+            max-width: 800px;
+            background: linear-gradient(135deg, #fff6f6 0%, #ffe6e6 100%);
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(0.5);
+            transition: all 1s ease;
+            z-index: 1;
+            border: 1px solid #ffd5d5;
+        }
+
+        .envelope.open + .letter {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+            z-index: 2;
+        }
+
+        .salutation {
+            font-family: 'Dancing Script', cursive;
+            font-weight: bold;
+            font-size: 2em;
+            margin-bottom: 30px;
+            color: #e74c3c;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .letter-title {
+            font-family: 'Dancing Script', cursive;
+            font-size: 2.5em;
+            text-align: center;
+            color: #e74c3c;
+            margin-bottom: 30px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+
+        p {
+            margin-bottom: 25px;
+            text-align: justify;
+            color: #4a4a4a;
+            font-size: 1.1em;
+            line-height: 1.9;
+            text-shadow: 1px 1px 1px rgba(255,255,255,0.8);
+        }
+
+        p:first-of-type::first-letter {
+            font-size: 2em;
+            font-family: 'Dancing Script', cursive;
+            color: #e74c3c;
+            padding-right: 4px;
+            float: left;
+        }
+
+        .emoji {
+            font-size: 1.1em;
+        }
+
+        .letter::before {
+            content: '❤️';
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 1.5em;
+            opacity: 0.2;
+        }
+
+        /* Estilos para los corazones animados */
+        .hearts-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .heart-float {
+            position: absolute;
+            color: #ff6f61;
+            font-size: 24px;
+            animation: float 6s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) scale(0);
+                opacity: 0;
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-10vh) scale(1);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="envelope">
+        <div class="envelope-text">
+            <div class="from-to">De Juanito</div>
+            <div class="from-to">Para Majo</div>
+            <div class="heart">❤️</div>
+            <div class="message">con mucho amor</div>
+        </div>
+    </div>
+    <div class="letter">
+        <div class="letter-title">Siempre para ti</div>
+        <div class="salutation">Mi amor, ❤️</div>
+        
+        <p>Sé que estos días han sido difíciles, que el trabajo te ha absorbido más de lo que nos gustaría, y que esa distancia que ya de por sí nos reta, se ha sentido aún más grande. 😔 No quiero que pienses ni por un segundo que esto cambia lo que siento por ti. Al contrario, cada día que pasa te admiro más por tu esfuerzo, por todo lo que haces, y por la mujer increíble que eres. 💪✨</p>
+        
+        <p>Entiendo que estés agotada y que a veces parezca que el tiempo no alcanza, pero quiero que sepas que aquí estoy, siempre, apoyándote, esperándote con paciencia y con amor. 🌟 No importa cuánto tiempo pase sin que podamos hablar como antes, cada minuto que compartimos vale más que cualquier distancia o cualquier obstáculo. 💬❤️</p>
+        
+        <p>Si pudiera, quitaría todo ese estrés de tus hombros y haría que el mundo se detuviera solo para que puedas respirar tranquila. 🌍⏸️  quiero recordarte que eres muy fuerte, que eres capaz, y que todo esto pasará. 🌈✨</p>
+        
+        <p>No estás sola mi niña preciosa. Estoy contigo en cada paso, aunque no podamos estar físicamente juntos en este momento. 👫💕 Y cuando por fin tengamos nuestro tiempo, lo haremos valer, porque nuestro amor merece eso y más. 🌹💖</p>
+        
+        <p><strong>Prometo estar ahí para ti, en las buenas y en las malas, porque eres lo más importante en mi vida.</strong> 🤝❤️ Cada día a tu lado es un regalo, y no hay nada que desee más que verte feliz y tranquila. 😊💫</p>
+        
+        <p>Te amo con todo mi corazón, y aquí seguiré, siempre para ti. 💌 Eres mi hogar, mi paz y mi razón para sonreír. 🌟 Siempre serás mi siempre. 🌠💞</p>
+        
+        <div class="signature">Con todo mi cariño,<br>Juanito 💕</div>
+    </div>
+
+    <div class="music-control">
+        <span>♪ Perfect - Ed Sheeran</span>
+        <audio id="bgMusic" loop>
+            <source src="Perfect - Ed Sheeran.mp3" type="audio/mp3">
+            Tu navegador no soporta la reproducción de audio.
+        </audio>
+        <button onclick="toggleMusic()">Reproducir Música</button>
+    </div>
+
+    <!-- Contenedor de corazones -->
+    <div class="hearts-container" id="heartsContainer"></div>
+
+    <script>
+        const envelope = document.querySelector('.envelope');
+        const musicControl = document.querySelector('.music-control');
+        const audio = document.getElementById('bgMusic');
+        const heartsContainer = document.getElementById('heartsContainer');
+        let musicPlaying = false;
+
+        envelope.addEventListener('click', function() {
+            this.classList.add('open');
+            musicControl.classList.add('visible');
+            startHearts(); // Inicia la animación de corazones
+        });
+
+        function toggleMusic() {
+            const button = musicControl.querySelector('button');
+            if (musicPlaying) {
+                audio.pause();
+                button.textContent = 'Reproducir Música';
+                musicPlaying = false;
+            } else {
+                audio.play();
+                button.textContent = 'Pausar Música';
+                musicPlaying = true;
+            }
+        }
+
+        // Función para crear corazones animados
+        function startHearts() {
+            const heartCount = 20; // Número de corazones
+            for (let i = 0; i < heartCount; i++) {
+                createHeart();
+            }
+        }
+
+        function createHeart() {
+            const heart = document.createElement('div');
+            heart.classList.add('heart-float');
+            heart.innerHTML = '❤️';
+            heart.style.left = Math.random() * 100 + 'vw'; // Posición horizontal aleatoria
+            heart.style.animationDuration = Math.random() * 4 + 3 + 's'; // Duración aleatoria
+            heart.style.fontSize = Math.random() * 20 + 16 + 'px'; // Tamaño aleatorio
+            heartsContainer.appendChild(heart);
+
+            // Elimina el corazón después de que termine la animación
+            heart.addEventListener('animationend', () => {
+                heart.remove();
+                createHeart(); // Crea un nuevo corazón
+            });
+        }
+    </script>
+</body>
+</html>
